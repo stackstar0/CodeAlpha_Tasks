@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Simple Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">SimpleStore</a>
+        <div class="nav-links" id="nav-links">
+            <!-- Populated by JS -->
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 4rem;">
+        <div id="product-details" class="card"
+            style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: row; min-height: 400px;">
+            <p style="padding: 2rem;">Loading...</p>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        async function loadProductDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                document.getElementById('product-details').innerHTML = '<p style="padding: 2rem;">Product not found.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/products/${id}`);
+                const product = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('product-details').innerHTML = `
+                        <div style="flex: 1;">
+                            <img src="${product.imageUrl || 'https://via.placeholder.com/400'}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div style="flex: 1; padding: 2rem; display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="font-size: 2rem; margin-bottom: 1rem;">${product.name}</h2>
+                            <p style="color: #475569; margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.6;">${product.description || 'No description available.'}</p>
+                            <h3 style="font-size: 2rem; color: #2563eb; margin-bottom: 2rem;">$${product.price}</h3>
+                            <button id="add-to-cart-btn" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem;">Add to Cart</button>
+                        </div>
+                    `;
+
+                    document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+                        addToCart(product);
+                    });
+                } else {
+                    document.getElementById('product-details').innerHTML = '<p style="padding: 2rem;">Product not found.</p>';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('product-details').innerHTML = '<p style="padding: 2rem;">Error loading product.</p>';
+            }
+        }
+
+        loadProductDetails();
+    </script>
+</body>
+
+</html>
