@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - SocialApp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <div class="layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">SocialApp 🚀</div>
+            <a href="feed.html" class="menu-item active">
+                <span class="menu-icon">🏠</span>
+                <span class="menu-text">Home</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Profile</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showToast('Notifications coming soon!')">
+                <span class="menu-icon">🔔</span>
+                <span class="menu-text">Notifications</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showToast('Messages coming soon!')">
+                <span class="menu-icon">✉️</span>
+                <span class="menu-text">Messages</span>
+            </a>
+            <a href="#" onclick="logout()" class="menu-item" style="margin-top:auto; color: #f87171;">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">Logout</span>
+            </a>
+        </aside>
+
+        <!-- Main Feed -->
+        <main class="main-content">
+            <div class="card">
+                <div style="display:flex; gap:12px;">
+                    <div class="user-avatar" id="currentUserAvatar" style="width:40px; height:40px; font-size:1rem;">Me
+                    </div>
+                    <div style="flex:1;">
+                        <textarea id="postContent" class="glass-input" rows="2" placeholder="What's happening?"
+                            style="margin-bottom:10px; background:transparent; border:none; padding:8px 0; font-size:1.2rem;"></textarea>
+
+                        <div style="border-top:1px solid var(--border); padding-top:10px; display:flex; gap:10px;">
+                            <input id="postImage" type="text" class="glass-input" placeholder="Paste image URL..."
+                                style="margin:0; padding:8px; font-size:0.9rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top:12px;">
+                    <button onclick="submitPost()" class="btn btn-sm" style="padding: 10px 24px;">Post</button>
+                </div>
+            </div>
+
+            <div id="feedContainer"></div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="card">
+                <h3 style="margin-bottom:16px;">Suggested for you</h3>
+                <!-- Mock Users -->
+                <div style="display:flex; align-items:center; margin-bottom:14px;">
+                    <div class="user-avatar" style="width:36px; height:36px; font-size:0.9rem; background:#3b82f6;">E
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600; font-size:0.95rem;">Elon Musk</div>
+                        <div class="text-muted">@elonmusk</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" style="color:var(--text); border-radius:20px;"
+                        onclick="handleFollow(3, this)">Follow</button>
+                </div>
+
+                <div style="display:flex; align-items:center;">
+                    <div class="user-avatar" style="width:36px; height:36px; font-size:0.9rem; background:#10b981;">B
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600; font-size:0.95rem;">Bill Gates</div>
+                        <div class="text-muted">@billgates</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" style="color:var(--text); border-radius:20px;"
+                        onclick="handleFollow(4, this)">Follow</button>
+                </div>
+            </div>
+
+            <div style="font-size:0.8rem; color:var(--text-muted); padding:0 20px;">
+                &copy; 2025 SocialApp Inc.
+            </div>
+        </aside>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        const curr = getCurrentUser();
+        if (!curr) window.location.href = 'index.html';
+        document.getElementById('currentUserAvatar').innerText = curr.name[0];
+
+        async function loadFeed() {
+            const posts = await getPosts();
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+            posts.forEach(post => renderPost(post, container));
+        }
+
+        async function submitPost() {
+            const content = document.getElementById('postContent').value;
+            const imageUrl = document.getElementById('postImage').value;
+            if (!content) return showToast("Post cannot be empty");
+
+            const btn = document.querySelector('button[onclick="submitPost()"]');
+            btn.innerText = 'Posting...';
+
+            const res = await createPost(content, imageUrl);
+            if (res.success) {
+                document.getElementById('postContent').value = '';
+                document.getElementById('postImage').value = '';
+                showToast("Posted successfully! 🎉");
+                loadFeed();
+            }
+            btn.innerText = 'Post';
+        }
+
+        window.loadFeed = loadFeed;
+        window.onload = loadFeed;
+    </script>
+</body>
+
+</html>

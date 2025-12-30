@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - SocialApp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">SocialApp 🚀</div>
+            <a href="feed.html" class="menu-item">
+                <span class="menu-icon">🏠</span>
+                <span class="menu-text">Home</span>
+            </a>
+            <a href="profile.html" class="menu-item active">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Profile</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showToast('Notifications coming soon!')">
+                <span class="menu-icon">🔔</span>
+                <span class="menu-text">Notifications</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showToast('Messages coming soon!')">
+                <span class="menu-icon">✉️</span>
+                <span class="menu-text">Messages</span>
+            </a>
+            <a href="#" onclick="logout()" class="menu-item" style="margin-top:auto; color:#f87171;">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">Logout</span>
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
+                <!-- Cover Image Mock -->
+                <div
+                    style="height: 120px; background: linear-gradient(to right, #8b5cf6, #ec4899); margin: -24px -24px 0 -24px; opacity: 0.8;">
+                </div>
+
+                <div class="user-avatar"
+                    style="width:100px; height:100px; margin:-50px auto 16px; font-size:3rem; border: 4px solid #1e293b; position: relative;"
+                    id="profileAvatar">U</div>
+                <h2 id="profileName" style="margin-bottom: 4px;">Loading...</h2>
+                <p id="profileBio" style="color:var(--text-muted); margin-bottom:20px;">...</p>
+
+                <div
+                    style="display:flex; justify-content:center; gap:24px; margin-bottom:24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 16px 0;">
+                    <div><strong style="display:block; font-size:1.2rem;" id="followersCount">0</strong> <span
+                            class="text-muted">Followers</span></div>
+                    <div><strong style="display:block; font-size:1.2rem;">12</strong> <span
+                            class="text-muted">Following</span></div>
+                </div>
+
+                <button id="editBtn" class="btn btn-outline" style="width:auto; display:none; border-radius: 99px;"
+                    onclick="openEditModal()">Edit Profile</button>
+            </div>
+
+            <h3 style="margin-bottom: 16px; padding-left: 8px;">Posts</h3>
+            <div id="postsContainer"></div>
+        </main>
+
+        <aside class="right-sidebar"></aside>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal">
+            <h2 style="margin-bottom:20px;">Edit Profile</h2>
+            <div style="margin-bottom: 16px;">
+                <label style="display:block; margin-bottom:8px; font-weight:600;">Display Name</label>
+                <input id="editName" class="glass-input" placeholder="Display Name">
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display:block; margin-bottom:8px; font-weight:600;">Bio</label>
+                <input id="editBio" class="glass-input" placeholder="Software Engineer..." style="height: 80px;">
+            </div>
+            <div style="display:flex; gap:12px; justify-content: flex-end;">
+                <button class="btn btn-outline" style="width: auto;" onclick="closeEditModal()">Cancel</button>
+                <button class="btn" style="width: auto;" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        const currentUser = getCurrentUser();
+        if (!currentUser) window.location.href = 'index.html';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('id') ? parseInt(urlParams.get('id')) : currentUser.id;
+
+        async function loadProfile() {
+            const res = await getUser(targetUserId);
+            if (res.error) return showToast("User not found");
+
+            const { user, posts } = res;
+
+            document.getElementById('profileName').innerText = user.name;
+            document.getElementById('profileBio').innerText = user.bio;
+            document.getElementById('profileAvatar').innerText = user.name[0];
+            document.getElementById('followersCount').innerText = user.followers.length;
+
+            if (user.id === currentUser.id) {
+                document.getElementById('editBtn').style.display = 'inline-block';
+                document.getElementById('editName').value = user.name;
+                document.getElementById('editBio').value = user.bio;
+            }
+
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            posts.forEach(post => renderPost(post, container));
+        }
+
+        function openEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('open'), 10);
+        }
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('open');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('editName').value;
+            const bio = document.getElementById('editBio').value;
+
+            const res = await updateProfile(currentUser.id, { name, bio });
+            if (res.success) {
+                localStorage.setItem('user', JSON.stringify(res.user)); // Update local stash
+                showToast("Profile updated!");
+                closeEditModal();
+                loadProfile();
+            }
+        }
+
+        window.loadProfile = loadProfile;
+        window.onload = loadProfile;
+    </script>
+</body>
+
+</html>

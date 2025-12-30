@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SocialApp</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body class="login-page">
+
+    <div class="card" style="width: 100%; max-width: 420px; padding: 40px;">
+        <div id="loginSection">
+            <h1 class="logo" style="margin-bottom: 0;">SocialApp 🚀</h1>
+            <p class="text-muted" style="margin-bottom: 24px;">Connect, Share, and Discover.</p>
+
+            <form id="loginForm">
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Email
+                        Address</label>
+                    <input type="email" id="email" class="glass-input" placeholder="john@example.com" required>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Password</label>
+                    <input type="password" id="password" class="glass-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center;">
+                <p class="text-muted" style="margin-bottom: 10px;">Don't have an account?</p>
+                <button class="btn btn-outline" style="width: auto;" onclick="toggleAuth('register')">Create
+                    Account</button>
+            </div>
+        </div>
+
+        <div id="registerSection" style="display: none;">
+            <h1 class="logo" style="margin-bottom: 0;">Join Us 🚀</h1>
+            <p class="text-muted" style="margin-bottom: 24px;">Create your account today.</p>
+
+            <form id="registerForm">
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Full
+                        Name</label>
+                    <input type="text" id="regName" class="glass-input" placeholder="John Doe" required>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Email
+                        Address</label>
+                    <input type="email" id="regEmail" class="glass-input" placeholder="john@example.com" required>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Password</label>
+                    <input type="password" id="regPassword" class="glass-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center;">
+                <p class="text-muted" style="margin-bottom: 10px;">Already have an account?</p>
+                <button class="btn btn-outline" style="width: auto;" onclick="toggleAuth('login')">Sign In</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-muted); text-align: center; opacity: 0.7;">
+            <p>Mock Access:</p>
+            <p>john@example.com / password</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleAuth(view) {
+            const login = document.getElementById('loginSection');
+            const register = document.getElementById('registerSection');
+            if (view === 'register') {
+                login.style.display = 'none';
+                register.style.display = 'block';
+            } else {
+                login.style.display = 'block';
+                register.style.display = 'none';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            btn.innerText = 'Signing in...';
+            btn.style.opacity = '0.7';
+
+            try {
+                const res = await login(email, password);
+                if (res.success) {
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    window.location.href = 'feed.html';
+                } else {
+                    const err = document.getElementById('errorMsg');
+                    err.innerText = res.message;
+                    err.style.display = 'block';
+                    btn.innerText = 'Sign In';
+                    btn.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error(error);
+                btn.innerText = 'Sign In';
+                btn.style.opacity = '1';
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            btn.innerText = 'Signing up...';
+            btn.style.opacity = '0.7';
+
+            try {
+                const res = await register(name, email, password);
+                if (res.success) {
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    window.location.href = 'feed.html';
+                } else {
+                    alert(res.message || "Registration failed"); // Simple alert for now or reuse errorMsg
+                    btn.innerText = 'Sign Up';
+                    btn.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred");
+                btn.innerText = 'Sign Up';
+                btn.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+
+</html>
